@@ -48,10 +48,15 @@ def lower_case(script):
 
 
 def print_result(outputdata):
+    ret = ""
     if outputdata[0][0] > outputdata[0][1]:
-        print("{:.1f}%로 정상 스크립트".format(outputdata[0][0] * 100))
+        ret = "정상 스크립트입니다.\n\n확률(%) : " + str(round(outputdata[0][0] * 100, 1))
     else:
-        print("{:.1f}%로 악성 스크립트".format(outputdata[0][1] * 100))
+        ret = "악성 스크립트입니다.\n\n확률(%) : " + str(round(outputdata[0][1] * 100, 1))
+
+    f_decoding = open("mlResult.txt", 'w')
+    f_decoding.write(ret)
+    f_decoding.close()
 
 
 def start():
@@ -67,11 +72,12 @@ def start():
         # txt파일 읽기
         script = read_file(directory)
 
-
-        print("psParser1.txt.txt 내용 확인 : ", script) # 확인용
-
         if script == 'None':
             print("파일에 잘못된 값이 존재")
+            ret = "파일에 잘못된 값이 존재합니다"
+            f_decoding = open("mlResult.txt", 'w')
+            f_decoding.write(ret)
+            f_decoding.close()
         else:
             script = lower_case(script)  # 소문자로 바꾸기, 길이 1 제거
             count = joblib.load('countvector.pkl') # 'countvector.pkl'

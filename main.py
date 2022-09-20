@@ -1,26 +1,7 @@
-import base64
 import tkinter as tk
-import tkinter.ttk as ttk
-
-import chardet
 from tkinter import *
-from tkinter import filedialog
 
-import self as self
-
-import os
-import pandas as pd
-import subprocess
 import numpy as np
-import matplotlib.pyplot as plt
-import joblib
-import operator, sys
-from cryptography.fernet import Fernet
-import rsa
-
-from Crypto import Random
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5 as Cipher_pkcs1_v1_5
 
 from services.basicSettingSerivce import *
 from services.deobfuscationService import *
@@ -29,29 +10,29 @@ from services.mlService import *
 np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 file_path = ""
 
-
-# 파일 불러오기 # event loop에서 return값을 못 받아서 이렇게 설정함.
+# 파일 불러오기 # event loop에서 return값을 못 받아서 main에 두기.
 def open_file():
     global file_path
     file_path = filedialog.askopenfilename(filetypes=[('Text File','.txt')])
     file_path = file_path.replace('\\', '/')
-    print("파일 경로 : ", file_path)
     if file_path == '':
         print("파일 경로를 찾을 수 없습니다.")
         exit()
     else:
         print("파일 업로드 완료")
-        print("\n")
 
 class SampleApp(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-        width, height = 800, 800  # 창 크기 값 설정
+        width, height = 600, 400  # 창 크기 값 설정
 
         self.geometry('{0}x{1}'.format(width, height))  # 창 크기 설정
+        # self.geometry("800x400")
         self.resizable(False, False)  # 크기 조정 가능 여부
 
-        self.title('어쩔보안')  # 창 제목 설정
+        self.title('TEAM_어쩔보안')  # 창 제목 설정
+
+        self.iconbitmap('main_image.ico')
 
         self._frame = None
         self.switch_frame(FileSelectingPage)
@@ -68,69 +49,201 @@ class SampleApp(tk.Tk):
 
 class FileSelectingPage(tk.Frame):
     def __init__(self, master):
-        # tkinter button에서 return 값 사용하는 법 -> (1) global, (2) lambda 사용
         tk.Frame.__init__(self, master)
-        tk.Button(self, text='1. 파일 선택', width=20, height=3,
-                  command=lambda: [open_file(), button.config(state=tk.NORMAL)]).pack()
 
-        button = tk.Button(self, text="Go to the deobfuscation", command=lambda: master.switch_frame(DeobfuscationPage), state="disabled")
-        button.pack()
+        #진행 바
+        process_btn1 = tk.Button(self, text="파일 선택", width=20, bg="LightSteelBlue3")
+        process_btn1.grid(row=0, column=0, columnspan=2)
+        process_btn2 = tk.Button(self, text="비난독화 방식 선택", width=20, state="disabled", relief="ridge")
+        process_btn2.grid(row=0, column=2, columnspan=2)
+        process_btn3 = tk.Button(self, text="비난독화 결과 확인", width=20, state="disabled", relief="ridge")
+        process_btn3.grid(row=0, column=4, columnspan=2)
+        process_btn4 = tk.Button(self, text="악성 스크립트 결과 확인", width=20, state="disabled", relief="ridge")
+        process_btn4.grid(row=0, column=6, columnspan=2)
 
-        label1 = Label(self, text="파일 업로드 상태 : X", width=30, height=4, fg='blue')
-        label1.pack()
-        label2 = Label(self, text="비난독화 진행 상태 : X", width=30, height=1, fg='blue')
-        label2.pack()
-        label2 = Label(self, text="비난독화는 'utf-8, euc-kr, ascii, 16진수'만 가능합니다.", width=50, height=1, fg='red')
-        label2.pack()
-        label3 = Label(self, text="악성 스크립트 탐지 결과 : 미정", width=30, height=4, fg='blue')
-        label3.pack()
+        self.grid_rowconfigure(1, minsize=20) # 칸 띄우기
 
+        file_button = tk.Button(self, text='파일 선택', width=40, height=4, bg="LightSteelBlue1",
+                  command=lambda: [open_file(), button.config(state=tk.NORMAL, text="다음 단계로 넘어가기", bg="LightSteelBlue1", fg="blue")
+                      , file_button.config(text="파일 재선택", bg="gainsboro")])
+        file_button.grid(row=2, column=2, columnspan=4)
 
-    # root.mainloop()
+        self.grid_rowconfigure(3, minsize=20)
+
+        button = tk.Button(self, text="파일을 먼저 선택 하세요", command=lambda: master.switch_frame(DeobfuscationPage), state="disabled")
+        button.grid(row=4, column=3, columnspan=2)
+
+        self.grid_rowconfigure(5, minsize=200)
+
+        #알림창
+        vBtn = tk.Button(self, text="❓", command=fnAlert, bg="gray90")
+        vBtn.grid(row=6, column=7, sticky=E)
 
 class DeobfuscationPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
-        tk.Button(self, text='2-1. 난독화X', width=20, height=3, command=lambda: [fileRead(file_path), button.config(state=tk.NORMAL)]).pack()  #
-        tk.Button(self, text='2-2. 난독화O-Base64', width=20, height=3,
-                         command=lambda: decode_base64(file_path)).pack()  #
-        tk.Button(self, text='2-2. 난독화O-16진수', width=20, height=3, command=lambda: [decode_hex(file_path), button.config(state=tk.NORMAL)]).pack()
-        # my_btn5 = Button(root, text='2-2. 난독화O-XOR_encode', width=20, height=3, command= lambda : xor_encode(file_path)).pack()
-        tk.Button(self, text='2-2. 난독화O-XOR_decode', width=20, height=3,
-                         command=lambda: [xor_decode(file_path), button.config(state=tk.NORMAL)]).pack()
-        # my_btn7 = Button(root, text='2-2. 난독화O-XOR', width=20, height=3, command= lambda : xor(file_path)).pack()
-        # my_btn8 = Button(root, text='2-2. 난독화X-대칭키테스트', width=20, height=3, command= lambda : symmetricKey(file_path)).pack()
-        tk.Button(self, text='2-2. 난독화X-대칭키-Decode', width=20, height=3,
-                         command=lambda: [decode_symmetric(file_path), button.config(state=tk.NORMAL)]).pack()
-        tk.Button(self, text='2-2. 난독화X-RSA-Encode', width=20, height=3,
-                         command=lambda: [rsaEncode(file_path), button.config(state=tk.NORMAL)]).pack()
-        tk.Button(self, text='2-2. 난독화X-RSA-Decode', width=20, height=3,
-                         command=lambda: [rsaDecode(file_path), button.config(state=tk.NORMAL)]).pack()
+        # 진행 바
+        process_btn1 = tk.Button(self, text="파일 선택", width=20, command=lambda: master.switch_frame(FileSelectingPage), bg="LightSteelBlue3", fg="gray")
+        process_btn1.grid(row=0, column=0, columnspan=2)
+        process_btn2 = tk.Button(self, text="비난독화 방식 선택", width=20, bg="LightSteelBlue3")
+        process_btn2.grid(row=0, column=2, columnspan=2)
+        process_btn3 = tk.Button(self, text="비난독화 결과 확인", width=20, state="disabled", relief="ridge")
+        process_btn3.grid(row=0, column=4, columnspan=2)
+        process_btn4 = tk.Button(self, text="악성 스크립트 결과 확인", width=20, state="disabled", relief="ridge")
+        process_btn4.grid(row=0, column=6, columnspan=2)
 
-        # my_btn10 = Button(root, text='2-2. 난독화X-XOR-EncodeDecode', width=20, height=3, command= lambda : xor_encode_decode(file_path)).pack()
-        button = tk.Button(self, text="Go to the deobfuscation Result", command=lambda: master.switch_frame(DeobfuscationResultPage), state="disabled")
-        button.pack()
+        self.grid_rowconfigure(1, minsize=20)
+
+        button1 = tk.Button(self, text='Base64 비난독화', width=40, height=4, bg="LightSteelBlue1",
+                            command=lambda: [decode_base64(file_path),
+                                               button.config(state=tk.NORMAL, text="Base64 비난독화 진행", bg="LightSteelBlue1", fg="blue"),
+                                               button1.config(bg="LightSteelBlue1", relief="sunken"), button2.config(bg="gainsboro", relief="raised"),
+                                               button3.config(bg="gainsboro", relief="raised")])
+        button1.grid(row=2, column=2, columnspan=4)
+        self.grid_rowconfigure(3, minsize=20)
+
+        button2 = tk.Button(self, text='16진수 비난독화', width=40, height=4, bg="LightSteelBlue1",
+                            command=lambda: [decode_hex(file_path),
+                                             button.config(state=tk.NORMAL, text="16진수 비난독화 진행", bg="LightSteelBlue1", fg="blue"),
+                                             button1.config(bg="gainsboro", relief="raised"),
+                                             button2.config(bg="LightSteelBlue1", relief="sunken"),
+                                             button3.config(bg="gainsboro", relief="raised")])
+        button2.grid(row=4, column=2, columnspan=4)
+        self.grid_rowconfigure(5, minsize=20)
+
+        button3 = tk.Button(self, text='비난독화 진행 X', width=40, height=4, bg="LightSteelBlue1",
+                            command=lambda: [fileRead(file_path),
+                                             button.config(state=tk.NORMAL, text="ML으로 넘어가기", bg="LightSteelBlue1", fg="blue"),
+                                             button1.config(bg="gainsboro", relief="raised"),
+                                             button2.config(bg="gainsboro", relief="raised"),
+                                             button3.config(bg="LightSteelBlue1", relief="sunken")])
+        button3.grid(row=6, column=2, columnspan=4)
+        self.grid_rowconfigure(7, minsize=20)
+
+        button = tk.Button(self, text="비난독화 방식 선택", command=lambda: master.switch_frame(DeobfuscationResultPage), state="disabled")
+        button.grid(row=8, column=3, columnspan=2)
+        self.grid_rowconfigure(9, minsize=20)
+
+        # 뒤로 가기
+        backBtn = tk.Button(self, text="◀", bg="gray90", command=lambda: master.switch_frame(FileSelectingPage))
+        backBtn.grid(row=10, column=0, sticky='w')
+
+        # 알림창
+        vBtn = tk.Button(self, text="❓", bg="gray90", command=fnAlert)
+        vBtn.grid(row=10, column=7, sticky='e')
+
 
 class DeobfuscationResultPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        label1 = Label(self, text="비난독화 결과", width=30, height=1, fg='blue')
-        label1.pack()
 
-        tk.Button(self, text="Go to the ML Page", command=lambda: master.switch_frame(MlPage)).pack()
+        # 진행 바
+        process_btn1 = tk.Button(self, text="파일 선택", width=20,
+                                 command=lambda: master.switch_frame(FileSelectingPage), bg="LightSteelBlue3", fg="gray")
+        process_btn1.grid(row=0, column=0, columnspan=2)
+        process_btn2 = tk.Button(self, text="비난독화 방식 선택", width=20,
+                                 command=lambda: master.switch_frame(DeobfuscationPage), bg="LightSteelBlue3", fg="gray")
+        process_btn2.grid(row=0, column=2, columnspan=2)
+        process_btn3 = tk.Button(self, text="비난독화 결과 확인", width=20, bg="LightSteelBlue3")
+        process_btn3.grid(row=0, column=4, columnspan=2)
+        process_btn4 = tk.Button(self, text="악성 스크립트 결과 확인", width=20, state="disabled", relief="ridge")
+        process_btn4.grid(row=0, column=6, columnspan=2)
+
+        self.grid_rowconfigure(1, minsize=20)  # 칸 띄우기
+
+        scrollbar = Scrollbar(self)
+        scrollbar1 = Scrollbar(self)
+
+        list = Listbox(self, yscrollcommand=scrollbar.set, xscrollcommand=scrollbar1.set, width= 60, height= 12)
+
+        # my_btn15의 config 설정을 위해서 여기서 초기값 설정
+        my_btn15 = Button(self, text='악성스크립트 탐지', width=20, height=3, bg="LightSteelBlue1",
+                          command=lambda: [start(), master.switch_frame(MlResultPage)])
+
+        f = open("psParser1.txt", 'r')
+        while True:
+            line = f.readline()
+            if(line.find("비난독화가 올바르게 진행되지 않았습니다.") != -1):
+                my_btn15.config(text="비난독화 재실행")
+                my_btn15.config(command=lambda: [master.switch_frame(DeobfuscationPage)])
 
 
-class MlPage(tk.Frame):
+            if not line:
+                break
+            list.insert(END, line)
+
+        f.close()
+
+        list.grid(row=2, column=1, columnspan=6)
+        scrollbar.config(command=list.yview)
+        scrollbar.grid(row=2, column=7, rowspan=1, sticky='ns')
+
+        scrollbar1.config(command=list.xview, orient=HORIZONTAL, width=20)
+        scrollbar1.grid(row=3, column=1, columnspan=6, sticky='we')
+
+
+
+        label1 = Label(self, text="<비난독화 결과>", width=20, height=1)
+        label1.grid(row=4, column=3, columnspan=2)
+
+        self.grid_rowconfigure(5, minsize=20)
+
+        my_btn15.grid(row=6, column=2, columnspan=4)
+
+        # 뒤로 가기
+        backBtn = tk.Button(self, text="◀", bg="gray90", command=lambda: master.switch_frame(DeobfuscationPage))
+        backBtn.grid(row=7, column=0, sticky='w')
+
+        # 알림창
+        vBtn = tk.Button(self, text="❓", bg="gray90", command=fnAlert)
+        vBtn.grid(row=7, column=7, sticky='e')
+
+
+class MlResultPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        my_btn15 = Button(self, text='3. 악성스크립트 탐지', width=20, height=3, command=lambda : [start, button1.config(state=tk.NORMAL), button2.config(state=tk.NORMAL)]).pack()
-        # my_btn3 = Button(root, text='난독화 방식 확인', width=20, height=3, command=identifyObfuscationMethod).pack()
-        button1 = tk.Button(self, text="Restart", command=lambda: master.switch_frame(FileSelectingPage), state="disabled")
-        button1.pack()
 
-        button2 = tk.Button(self, text='종료', command= master.quit, state="disabled")
-        button2.pack()
+        # 진행 바
+        process_btn1 = tk.Button(self, text="파일 선택", width=20, command=lambda: master.switch_frame(FileSelectingPage), bg="LightSteelBlue3", fg="gray")  # disabled이면 fg가 안 먹음
+        process_btn1.grid(row=0, column=0, columnspan=2)
+        process_btn2 = tk.Button(self, text="비난독화 방식 선택", width=20, command=lambda: master.switch_frame(DeobfuscationPage), bg="LightSteelBlue3", fg="gray")
+        process_btn2.grid(row=0, column=2, columnspan=2)
+        process_btn3 = tk.Button(self, text="비난독화 결과 확인", width=20, command=lambda: master.switch_frame(DeobfuscationResultPage), bg="LightSteelBlue3", fg="gray")
+        process_btn3.grid(row=0, column=4, columnspan=2)
+        process_btn4 = tk.Button(self, text="악성 스크립트 결과 확인", width=20, bg="LightSteelBlue3")
+        process_btn4.grid(row=0, column=6, columnspan=2)
+
+        self.grid_rowconfigure(1, minsize=40)
+
+        label1 = Label(self, text="<정상 vs 악성>", width=25, height=1, font=(20))
+        label1.grid(row=2, column=2, columnspan=4)
+
+        self.grid_rowconfigure(3, minsize=20)
+
+        context = open("mlResult.txt", 'r').read()
+        label2 = Label(self, width = 25, text=context, height=5, font=(20))
+        if(context.find("정상") != -1): #정상인 경우
+            label2.config(bg="LightSteelBlue1")
+        else:
+            label2.config(bg="red", fg='yellow')
+        label2.grid(row=4, column=2, columnspan=4)
+
+        button1 = tk.Button(self, text="Restart", command=lambda: master.switch_frame(FileSelectingPage), width=10, height=2, bg="SlateGray1")
+        button1.grid(row=6, column=2, columnspan=1, rowspan=2, sticky='w')
+
+        button2 = tk.Button(self, text='종료', command=master.quit, width=10, height=2, bg="SlateGray1")
+        button2.grid(row=6, column=5, columnspan=1, rowspan=2, sticky='e')
+
+        self.grid_rowconfigure(7, minsize=140)
+
+        # 뒤로 가기
+        backBtn = tk.Button(self, text="◀", bg="gray90", command=lambda: master.switch_frame(DeobfuscationResultPage))
+        backBtn.grid(row=8, column=0, sticky='w')
+
+        # 알림창
+        vBtn = tk.Button(self, text="❓", bg="gray90", command=fnAlert)
+        vBtn.grid(row=8, column=7, sticky='e')
 
 if __name__ == "__main__":
     app = SampleApp()
