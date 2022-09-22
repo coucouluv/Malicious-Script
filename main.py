@@ -1,14 +1,23 @@
+import os
+import sys
 import tkinter as tk
-from tkinter import *
 
-import numpy as np
+from tkinter import filedialog, E, END, HORIZONTAL
 
-from services.basicSettingSerivce import *
-from services.deobfuscationService import *
-from services.mlService import *
+from services.basicSettingSerivce import fnAlert, fileRead
+from services.deobfuscationService import decode_base64, decode_hex
+from services.mlService import start
 
-np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 file_path = ""
+print("is it working?1")
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # 파일 불러오기 # event loop에서 return값을 못 받아서 main에 두기.
 def open_file():
@@ -32,7 +41,7 @@ class SampleApp(tk.Tk):
 
         self.title('TEAM_어쩔보안')  # 창 제목 설정
 
-        self.iconbitmap('main_image.ico')
+        self.iconbitmap(resource_path('main_image.ico'))
 
         self._frame = None
         self.switch_frame(FileSelectingPage)
@@ -152,16 +161,16 @@ class DeobfuscationResultPage(tk.Frame):
 
         self.grid_rowconfigure(1, minsize=20)  # 칸 띄우기
 
-        scrollbar = Scrollbar(self)
-        scrollbar1 = Scrollbar(self)
+        scrollbar = tk.Scrollbar(self)
+        scrollbar1 = tk.Scrollbar(self)
 
-        list = Listbox(self, yscrollcommand=scrollbar.set, xscrollcommand=scrollbar1.set, width= 60, height= 12)
+        list = tk.Listbox(self, yscrollcommand=scrollbar.set, xscrollcommand=scrollbar1.set, width= 60, height= 12)
 
         # my_btn15의 config 설정을 위해서 여기서 초기값 설정
-        my_btn15 = Button(self, text='악성스크립트 탐지', width=20, height=3, bg="LightSteelBlue1",
-                          command=lambda: [start(), master.switch_frame(MlResultPage)])
+        my_btn15 = tk.Button(self, text='악성스크립트 탐지', width=20, height=3, bg="LightSteelBlue1",
+                             command=lambda: [start(), master.switch_frame(MlResultPage)])
 
-        f = open("psParser1.txt", 'r')
+        f = open(resource_path("psParser1.txt"), 'r')
         while True:
             line = f.readline()
             if(line.find("비난독화가 올바르게 진행되지 않았습니다.") != -1):
@@ -184,7 +193,7 @@ class DeobfuscationResultPage(tk.Frame):
 
 
 
-        label1 = Label(self, text="<비난독화 결과>", width=20, height=1)
+        label1 = tk.Label(self, text="<비난독화 결과>", width=20, height=1)
         label1.grid(row=4, column=3, columnspan=2)
 
         self.grid_rowconfigure(5, minsize=20)
@@ -216,13 +225,13 @@ class MlResultPage(tk.Frame):
 
         self.grid_rowconfigure(1, minsize=40)
 
-        label1 = Label(self, text="<정상 vs 악성>", width=25, height=1, font=(20))
+        label1 = tk.Label(self, text="<정상 vs 악성>", width=25, height=1, font=(20))
         label1.grid(row=2, column=2, columnspan=4)
 
         self.grid_rowconfigure(3, minsize=20)
 
-        context = open("mlResult.txt", 'r').read()
-        label2 = Label(self, width = 25, text=context, height=5, font=(20))
+        context = open(resource_path("mlResult.txt"), 'r').read()
+        label2 = tk.Label(self, width = 25, text=context, height=5, font=(20))
         if(context.find("정상") != -1): #정상인 경우
             label2.config(bg="LightSteelBlue1")
         else:

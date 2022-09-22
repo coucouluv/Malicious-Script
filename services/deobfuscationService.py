@@ -1,16 +1,28 @@
 import base64
+import os
+import sys
 
+"""
 from tkinter import filedialog
 from cryptography.fernet import Fernet
 from Crypto import Random
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5 as Cipher_pkcs1_v1_5
+"""
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 
 def decode_base64(file_path):
     try:
         f_origin = open(file_path, 'r')
-        f_decoding = open("psParser1.txt", 'w')
+        f_decoding = open(resource_path("psParser1.txt"), 'w')
         while True:
             line = f_origin.readline()
             if not line: break
@@ -21,14 +33,14 @@ def decode_base64(file_path):
         f_origin.close()
         f_decoding.close()
     except:
-        f_decoding = open("psParser1.txt", 'w')
+        f_decoding = open(resource_path("psParser1.txt"), 'w')
         f_decoding.write("비난독화가 올바르게 진행되지 않았습니다.\n비난독화를 다시 진행해주세요.")
         f_decoding.close()
 
 def decode_hex(file_path):
     try:
         f_origin = open(file_path, 'r')
-        f_decoding = open("psParser1.txt", 'w')
+        f_decoding = open(resource_path("psParser1.txt"), 'w')
         while True:
             line = f_origin.readline()
             if not line: break
@@ -40,13 +52,14 @@ def decode_hex(file_path):
         f_origin.close()
         f_decoding.close()
     except:
-        f_decoding = open("psParser1.txt", 'w')
+        f_decoding = open(resource_path("psParser1.txt"), 'w')
         f_decoding.write("비난독화가 올바르게 진행되지 않았습니다.\n\n비난독화를 다시 진행해주세요.")
         f_decoding.close()
 
 """
 아래의 encode, decode는 키를 필요로 하는 방식들입니다.
 해당 프로젝트의 주제와 맞지 않다는 판단하에 일단은 사용하지 않았습니다.
+"""
 """
 def xor_encode_decode(file_path): #테스트 # ;기준으로 날라가는거 같은데 그거 나중에 확인 # 완전 정확하게 encode가 안되는거 같은데 왜 그런거지?
     d = open(file_path, 'r').read()
@@ -179,3 +192,4 @@ def open_key():
         print("\n")
 
     return key_path
+"""
