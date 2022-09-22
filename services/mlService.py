@@ -78,6 +78,9 @@ def start():
             f_decoding = open("mlResult.txt", 'w')
             f_decoding.write(ret)
             f_decoding.close()
+        elif len(script) == 0:
+            outputdata = [[0.999, 0.001]]
+            print_result(outputdata)
         else:
             script = lower_case(script)  # 소문자로 바꾸기, 길이 1 제거
             count = joblib.load('countvector.pkl') # 'countvector.pkl'
