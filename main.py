@@ -9,7 +9,6 @@ from services.deobfuscationService import decode_base64, decode_hex
 from services.mlService import start
 
 file_path = ""
-print("is it working?1")
 
 def resource_path(relative_path):
     try:

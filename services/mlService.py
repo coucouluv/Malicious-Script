@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 import joblib
-
+import shutil
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
@@ -13,7 +13,7 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 # 비난독화된 파일(txt) -> textPsParser 실행
-def run_psparser(directory):
+def run_psparser(directory, result_directory):
     # PATH에 자기가 위치하고 있는 곳 경로 추가
     curpath = os.getcwd() + ';'
     env = os.environ
@@ -25,11 +25,10 @@ def run_psparser(directory):
     #print("psParser1.txt 내용 확인 : ", script) # 확인용
 
     # 이전 파일에서 자동으로 업로드가 안되어서 있는지 확인하고 삭제하기
-    file_path = resource_path("result/psParser1.txt.txt")
-    if os.path.exists(file_path):
-        os.remove(file_path)
-
-    result = subprocess.run([resource_path('textPsParser.exe'), directory])
+   # file_path = resource_path("result/psParser1.txt.txt")
+   # if os.path.exists(file_path):
+   #     os.remove(file_path)
+    result = subprocess.run([resource_path('textPsParser.exe'), directory,result_directory])
 
 
 # textPsParser 실행 후 만들어진 txt 파일
@@ -71,16 +70,16 @@ def print_result(outputdata):
 
 def start():
     directory = resource_path("psParser1.txt")  # 확인하고 싶은 스크립트 파일 경로 # "./psParser1.txt"
-
+    result_directory= resource_path("result.txt")
     # 실행 전에 파일이 txt인지 확인하기 v
 
     if '.txt' in directory:
         # textPsParser 실행
-        run_psparser(os.path.join(directory))
+        run_psparser(os.path.join(directory),os.path.join(result_directory))
 
-        directory = "result/psParser1.txt.txt"  # psParser돌리고 난 파일 경로 # "./result/psParser1.txt.txt"
+       # directory = "result/psParser1.txt.txt"  # psParser돌리고 난 파일 경로 # "./result/psParser1.txt.txt"
         # txt파일 읽기
-        script = read_file(directory)
+        script = read_file(result_directory)
 
         if script == 'None':
             print("파일에 잘못된 값이 존재")
@@ -98,6 +97,5 @@ def start():
             model = joblib.load(resource_path('model.pkl')) # './model.pkl'
             outputdata = model.predict_proba(inputdata)
             print_result(outputdata)
-
     else:
         print("파일 형식이 잘못되었습니다.")
