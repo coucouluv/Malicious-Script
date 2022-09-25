@@ -1,4 +1,4 @@
-# 난독화가 안된 경우 # 비난독화를 하는 대신 해당 파일을 psParser1.txt에 저장해야 함.
+# 난독화가 안된 경우 # 비난독화를 하는 대신 해당 파일을 psParser1.txt에 저장
 import os
 import sys
 import tkinter.messagebox as msgbox

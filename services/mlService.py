@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 import joblib
-import shutil
+
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
@@ -21,13 +21,6 @@ def run_psparser(directory, result_directory):
     env['PATH'] = path
     # textPsParser.exe는 파이썬 코드와 같은 위치에 있어야함
 
-    #script = read_file(directory) # 확인용
-    #print("psParser1.txt 내용 확인 : ", script) # 확인용
-
-    # 이전 파일에서 자동으로 업로드가 안되어서 있는지 확인하고 삭제하기
-   # file_path = resource_path("result/psParser1.txt.txt")
-   # if os.path.exists(file_path):
-   #     os.remove(file_path)
     result = subprocess.run([resource_path('textPsParser.exe'), directory,result_directory])
 
 
@@ -71,7 +64,7 @@ def print_result(outputdata):
 def start():
     directory = resource_path("psParser1.txt")  # 확인하고 싶은 스크립트 파일 경로 # "./psParser1.txt"
     result_directory= resource_path("result.txt")
-    # 실행 전에 파일이 txt인지 확인하기 v
+    # 실행 전에 파일이 txt인지 확인하기
 
     if '.txt' in directory:
         # textPsParser 실행
