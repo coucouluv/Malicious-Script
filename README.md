@@ -14,7 +14,9 @@
 ### 3. 시스템 구성도
 
 ![시스템 구성도](https://user-images.githubusercontent.com/61836238/195824883-f5cbfb10-4058-4f99-966f-db0be5dcbcb7.PNG)
-
+1. 비난독화는 BASE64와 16진수를 이용한 방식으로 진행된다.
+2. PowerShell 스크립트에서 필요한 명령어만을 뽑아내는 전처리 과정을 거친다.
+3. AdaBoost, GBM, XGBoost 세가지를 앙상블한 모델을 사용하여 악성 스크립트를 탐지한다.
 
 ### 4. 소개 및 시연 영상
 
