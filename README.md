@@ -19,7 +19,7 @@
 3. AdaBoost, GBM, XGBoost 세가지를 앙상블한 모델을 사용하여 악성 스크립트를 탐지한다.
 
 ### 4. 소개 및 시연 영상
-
+[![47조 NLP 기반 Powershell 악성 스크립트 탐지 툴](http://img.youtube.com/vi/BcZA0i-ySRo/0.jpg)](https://www.youtube.com/watch?v=BcZA0i-ySRo)    
 
 ### 5. 설치 및 사용법
 
